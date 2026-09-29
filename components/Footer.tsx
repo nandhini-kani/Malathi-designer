@@ -13,7 +13,7 @@ const primaryCategories = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-violet-100 bg-violet-950 text-white">
+    <footer className="border-t border-violet-100 bg-violet-900 text-white">
       <div className="container-custom px-5 py-12 sm:px-6 sm:py-14 lg:px-8">
         <div className="grid gap-10 text-center sm:grid-cols-2 sm:text-left lg:grid-cols-4 lg:gap-10">
 
