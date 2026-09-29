@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
+import { isMongoObjectId } from "@/lib/ids";
 import { connectDB } from "@/lib/mongodb";
 import Service from "@/models/Service";
 export async function GET(
@@ -9,6 +10,10 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json({ success: false, message: "Invalid service ID." }, { status: 400 });
+    }
 
     await connectDB();
 
@@ -63,6 +68,11 @@ export async function PUT(
     }
 
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json({ success: false, message: "Invalid service ID." }, { status: 400 });
+    }
+
     const body = await request.json();
 
     await connectDB();
@@ -99,6 +109,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json({ success: false, message: "Invalid service ID." }, { status: 400 });
+    }
+
     await connectDB();
     const service = await Service.findById(id);
 

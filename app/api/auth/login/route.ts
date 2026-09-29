@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-import { COOKIE_NAME, ADMIN_CREDENTIALS, createAuthToken } from "@/lib/auth";
+import {
+  COOKIE_NAME,
+  createAuthToken,
+  getBootstrapAdminCredentials,
+} from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 
@@ -19,17 +23,26 @@ export async function POST(request: Request) {
 
     const admin = await User.findOne({ email, role: "admin" });
     if (!admin) {
-      const fallbackEmail = (ADMIN_CREDENTIALS.email || "").toLowerCase();
-      const fallbackPassword = ADMIN_CREDENTIALS.password || "";
+      const bootstrapCredentials = getBootstrapAdminCredentials();
 
-      if (email !== fallbackEmail || password !== fallbackPassword) {
+      if (!bootstrapCredentials) {
+        return NextResponse.json(
+          { success: false, message: "Admin account is not configured." },
+          { status: 503 }
+        );
+      }
+
+      if (
+        email !== bootstrapCredentials.email ||
+        password !== bootstrapCredentials.password
+      ) {
         return NextResponse.json({ success: false, message: "Invalid email or password." }, { status: 401 });
       }
 
-      const hashedPassword = await bcrypt.hash(fallbackPassword, 10);
+      const hashedPassword = await bcrypt.hash(bootstrapCredentials.password, 10);
       const createdAdmin = await User.create({
         name: "Malathi Designer Admin",
-        email: fallbackEmail,
+        email: bootstrapCredentials.email,
         password: hashedPassword,
         role: "admin"
       });

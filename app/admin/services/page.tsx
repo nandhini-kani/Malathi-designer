@@ -33,18 +33,40 @@ export default function AdminServicesPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  async function fetchServices() {
+  async function fetchServices(): Promise<ServiceItem[]> {
+    const response = await fetch("/api/services", { cache: "no-store" });
+    const data = await response.json();
+
+    return Array.isArray(data?.data?.services)
+      ? data.data.services
+      : [];
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchServices()
+      .then((services) => {
+        if (isMounted) setServices(services);
+      })
+      .catch((error) => {
+        console.error("Fetch services error:", error);
+        if (isMounted) setServices([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function refreshServices() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/services");
-      const data = await response.json();
-
-      setServices(
-        Array.isArray(data?.data?.services)
-          ? data.data.services
-          : []
-      );
+      setServices(await fetchServices());
     } catch (error) {
       console.error("Fetch services error:", error);
       setServices([]);
@@ -52,10 +74,6 @@ export default function AdminServicesPage() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    fetchServices();
-  }, []);
 
   async function handleSave(values: ServiceFormValues) {
     try {
@@ -88,7 +106,7 @@ export default function AdminServicesPage() {
       }
 
       setEditingId(null);
-      await fetchServices();
+      await refreshServices();
     } catch (error) {
       console.error("Save service error:", error);
       alert("Something went wrong while saving the service.");
@@ -116,7 +134,7 @@ export default function AdminServicesPage() {
         setEditingId(null);
       }
 
-      await fetchServices();
+      await refreshServices();
     } catch (error) {
       console.error("Delete service error:", error);
       alert("Something went wrong while deleting.");
@@ -155,7 +173,7 @@ export default function AdminServicesPage() {
         return;
       }
 
-      await fetchServices();
+      await refreshServices();
     } catch (error) {
       console.error("Toggle service error:", error);
       alert("Unable to change service status.");
@@ -302,6 +320,7 @@ export default function AdminServicesPage() {
               </div>
 
               <ServiceForm
+                key={editingId ?? "new-service"}
                 initialValues={initialValues}
                 submitLabel={
                   editingId

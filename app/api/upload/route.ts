@@ -20,6 +20,17 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Cloudinary configuration is missing." },
+        { status: 500 }
+      );
+    }
+
     // Read uploaded file
     const formData = await request.formData();
     const file = formData.get("file");
@@ -107,10 +118,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unable to upload image."
+        message: "Unable to upload image."
       },
       { status: 500 }
     );

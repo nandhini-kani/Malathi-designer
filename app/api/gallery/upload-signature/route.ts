@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 
+import { requireAdmin } from "@/lib/auth";
 import cloudinary, { cloudinaryFolder } from "@/lib/cloudinary";
 
 export async function POST() {
   try {
+    const admin = await requireAdmin();
+
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;

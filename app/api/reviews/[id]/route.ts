@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
+import { isMongoObjectId } from "@/lib/ids";
 import { connectDB } from "@/lib/mongodb";
 import Review from "@/models/Review";
 
@@ -25,7 +26,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    if (!id) {
+    if (!isMongoObjectId(id)) {
       return NextResponse.json(
         {
           success: false,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 export type ServiceFormValues = {
@@ -44,29 +44,6 @@ export default function ServiceForm({
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState("");
-
-  /*
-   * Load selected service when Edit is clicked.
-   */
-  useEffect(() => {
-    setValues({
-      title: initialValues?.title ?? "",
-      description: initialValues?.description ?? "",
-      image: initialValues?.image ?? "",
-      price: initialValues?.price ?? "",
-      isActive: initialValues?.isActive ?? true,
-      sortOrder: initialValues?.sortOrder ?? 0,
-    });
-
-    setImageError("");
-  }, [
-    initialValues?.title,
-    initialValues?.description,
-    initialValues?.image,
-    initialValues?.price,
-    initialValues?.isActive,
-    initialValues?.sortOrder,
-  ]);
 
   async function handleImageUpload(
     event: React.ChangeEvent<HTMLInputElement>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const categories = [
   "Blouse",
@@ -32,35 +32,18 @@ export default function GalleryUpload({
   onSubmit,
   submitLabel = "Save image",
 }: GalleryUploadProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Other");
-  const [imageUrl, setImageUrl] = useState("");
-  const [publicId, setPublicId] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const [title, setTitle] = useState(initialValues?.title || "");
+  const [description, setDescription] = useState(initialValues?.description || "");
+  const [category, setCategory] = useState(initialValues?.category || "Other");
+  const [imageUrl, setImageUrl] = useState(initialValues?.imageUrl || "");
+  const [publicId, setPublicId] = useState(initialValues?.publicId || "");
+  const [isActive, setIsActive] = useState(initialValues?.isActive ?? true);
 
   const [uploadingImage, setUploadingImage] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [imageError, setImageError] = useState("");
   const [formError, setFormError] = useState("");
-
-  /*
-   * IMPORTANT:
-   * This keeps the form values synchronized when you click Edit
-   * and the initialValues change.
-   */
-  useEffect(() => {
-    setTitle(initialValues?.title || "");
-    setDescription(initialValues?.description || "");
-    setCategory(initialValues?.category || "Other");
-    setImageUrl(initialValues?.imageUrl || "");
-    setPublicId(initialValues?.publicId || "");
-    setIsActive(initialValues?.isActive ?? true);
-
-    setImageError("");
-    setFormError("");
-  }, [initialValues]);
 
   async function handleImageUpload(
     event: React.ChangeEvent<HTMLInputElement>

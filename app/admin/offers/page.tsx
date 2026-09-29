@@ -33,22 +33,43 @@ export default function AdminOffersPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  async function fetchOffers() {
+  async function fetchOffers(): Promise<OfferItem[]> {
+    const response = await fetch("/api/offers", {
+      method: "GET",
+      cache: "no-store",
+    });
+    const data = await response.json();
+
+    return Array.isArray(data?.data?.offers)
+      ? data.data.offers
+      : [];
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchOffers()
+      .then((offers) => {
+        if (isMounted) setOffers(offers);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch offers:", error);
+        if (isMounted) setOffers([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function refreshOffers() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/offers", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      const data = await response.json();
-
-      setOffers(
-        Array.isArray(data?.data?.offers)
-          ? data.data.offers
-          : []
-      );
+      setOffers(await fetchOffers());
     } catch (error) {
       console.error("Failed to fetch offers:", error);
       setOffers([]);
@@ -56,10 +77,6 @@ export default function AdminOffersPage() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    fetchOffers();
-  }, []);
 
   async function handleSave(values: {
     title: string;
@@ -102,7 +119,7 @@ export default function AdminOffersPage() {
 
       setEditingId(null);
 
-      await fetchOffers();
+      await refreshOffers();
     } catch (error) {
       console.error("Save offer error:", error);
       alert("Something went wrong while saving the offer.");
@@ -134,7 +151,7 @@ export default function AdminOffersPage() {
         setEditingId(null);
       }
 
-      await fetchOffers();
+      await refreshOffers();
     } catch (error) {
       console.error("Delete offer error:", error);
       alert("Something went wrong while deleting the offer.");
@@ -175,7 +192,7 @@ export default function AdminOffersPage() {
         return;
       }
 
-      await fetchOffers();
+      await refreshOffers();
     } catch (error) {
       console.error("Toggle offer error:", error);
       alert(

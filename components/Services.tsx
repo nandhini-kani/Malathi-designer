@@ -149,7 +149,7 @@ export default function Services({
                             Starting from
                           </p>
 
-                          <p className="mt-1 text-lg font-bold text-rose-600">
+                          <p className="mt-1 text-lg font-bold text-violet-900">
                             ₹ {String(service.price)}
                           </p>
                         </>

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import cloudinary from "@/lib/cloudinary";
 import { requireAdmin } from "@/lib/auth";
+import { isMongoObjectId } from "@/lib/ids";
 import { connectDB } from "@/lib/mongodb";
 import Gallery from "@/models/Gallery";
 
@@ -22,6 +23,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid gallery item ID." },
+        { status: 400 }
+      );
+    }
 
     await connectDB();
 
@@ -99,6 +107,13 @@ export async function PUT(
     ----------------------------- */
 
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid gallery item ID." },
+        { status: 400 }
+      );
+    }
 
     /* -----------------------------
        READ BODY
@@ -261,6 +276,13 @@ export async function DELETE(
     ----------------------------- */
 
     const { id } = await params;
+
+    if (!isMongoObjectId(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid gallery item ID." },
+        { status: 400 }
+      );
+    }
 
     /* -----------------------------
        CONNECT DATABASE

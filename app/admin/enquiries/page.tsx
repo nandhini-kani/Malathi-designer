@@ -19,22 +19,43 @@ export default function AdminEnquiriesPage() {
   const [enquiries, setEnquiries] = useState<EnquiryRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function fetchEnquiries() {
+  async function fetchEnquiries(): Promise<EnquiryRecord[]> {
+    const response = await fetch("/api/enquiries", {
+      method: "GET",
+      cache: "no-store",
+    });
+    const data = await response.json();
+
+    return Array.isArray(data?.data?.enquiries)
+      ? data.data.enquiries
+      : [];
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchEnquiries()
+      .then((records) => {
+        if (isMounted) setEnquiries(records);
+      })
+      .catch((error) => {
+        console.error("Fetch enquiries error:", error);
+        if (isMounted) setEnquiries([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function refreshEnquiries() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/enquiries", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      const data = await response.json();
-
-      setEnquiries(
-        Array.isArray(data?.data?.enquiries)
-          ? data.data.enquiries
-          : []
-      );
+      setEnquiries(await fetchEnquiries());
     } catch (error) {
       console.error("Fetch enquiries error:", error);
       setEnquiries([]);
@@ -42,10 +63,6 @@ export default function AdminEnquiriesPage() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    fetchEnquiries();
-  }, []);
 
   async function handleStatusChange(
     id: string,
@@ -67,7 +84,7 @@ export default function AdminEnquiriesPage() {
         return;
       }
 
-      await fetchEnquiries();
+      await refreshEnquiries();
     } catch (error) {
       console.error("Update enquiry error:", error);
       alert("Unable to update enquiry status.");
@@ -95,7 +112,7 @@ export default function AdminEnquiriesPage() {
         return;
       }
 
-      await fetchEnquiries();
+      await refreshEnquiries();
     } catch (error) {
       console.error("Delete enquiry error:", error);
       alert("Unable to delete enquiry.");

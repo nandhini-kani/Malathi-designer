@@ -2,20 +2,38 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 
 import { connectDB } from "@/lib/mongodb";
+import { isMongoObjectId } from "@/lib/ids";
 import User from "@/models/User";
 
 export const COOKIE_NAME = "malathi_admin_token";
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || process.env.AUTH_SECRET || "malathi-designer-dev-secret"
-);
+function getAuthSecret() {
+  const secret = process.env.AUTH_SECRET || process.env.JWT_SECRET;
+
+  if (!secret || secret.length < 32) {
+    throw new Error("AUTH_SECRET must be configured with at least 32 characters.");
+  }
+
+  return new TextEncoder().encode(secret);
+}
+
+export function getBootstrapAdminCredentials() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    return null;
+  }
+
+  return { email, password };
+}
 
 export async function createAuthToken(userId: string) {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(getAuthSecret());
 }
 
 export async function getAuthUserId() {
@@ -27,7 +45,7 @@ export async function getAuthUserId() {
   }
 
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getAuthSecret());
     return typeof payload.userId === "string" ? payload.userId : null;
   } catch {
     return null;
@@ -37,7 +55,7 @@ export async function getAuthUserId() {
 export async function requireAdmin() {
   const userId = await getAuthUserId();
 
-  if (!userId) {
+  if (!userId || !isMongoObjectId(userId)) {
     return null;
   }
 
@@ -57,7 +75,3 @@ export async function requireAdmin() {
   };
 }
 
-export const ADMIN_CREDENTIALS = {
-  email: process.env.ADMIN_EMAIL || "admin@malathidesigner.in",
-  password: process.env.ADMIN_PASSWORD || "Admin12345!"
-};

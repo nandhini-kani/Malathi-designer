@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
+import { isMongoObjectId } from "@/lib/ids";
 import { connectDB } from "@/lib/mongodb";
 import Review from "@/models/Review";
 
@@ -36,7 +37,11 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, action } = body as { id?: string; action?: "approve" | "reject" };
 
-    if (!id || !action) {
+    if (typeof id !== "string" || !isMongoObjectId(id)) {
+      return NextResponse.json({ success: false, message: "A valid review ID is required." }, { status: 400 });
+    }
+
+    if (action !== "approve" && action !== "reject") {
       return NextResponse.json({ success: false, message: "Review id and action are required." }, { status: 400 });
     }
 

@@ -19,31 +19,47 @@ export default function AdminReviewsPage() {
   const [reviews, setReviews] = useState<ReviewRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function fetchReviews() {
+  async function fetchReviews(): Promise<ReviewRecord[]> {
+    const response = await fetch("/api/admin/reviews", {
+      method: "GET",
+      cache: "no-store",
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Unable to load reviews.");
+    }
+
+    return Array.isArray(data?.data?.reviews)
+      ? data.data.reviews
+      : [];
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchReviews()
+      .then((reviews) => {
+        if (isMounted) setReviews(reviews);
+      })
+      .catch((error) => {
+        console.error("Fetch reviews error:", error);
+        if (isMounted) setReviews([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function refreshReviews() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/admin/reviews", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        console.error(
-          data.message || "Unable to load reviews."
-        );
-
-        setReviews([]);
-        return;
-      }
-
-      setReviews(
-        Array.isArray(data?.data?.reviews)
-          ? data.data.reviews
-          : []
-      );
+      setReviews(await fetchReviews());
     } catch (error) {
       console.error("Fetch reviews error:", error);
       setReviews([]);
@@ -51,10 +67,6 @@ export default function AdminReviewsPage() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    fetchReviews();
-  }, []);
 
   async function handleApprove(id: string) {
     try {
@@ -78,7 +90,7 @@ export default function AdminReviewsPage() {
         return;
       }
 
-      await fetchReviews();
+      await refreshReviews();
     } catch (error) {
       console.error("Approve review error:", error);
       alert("Unable to approve review.");
@@ -107,7 +119,7 @@ export default function AdminReviewsPage() {
         return;
       }
 
-      await fetchReviews();
+      await refreshReviews();
     } catch (error) {
       console.error("Reject review error:", error);
       alert("Unable to reject review.");

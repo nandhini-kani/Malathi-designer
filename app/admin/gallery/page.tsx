@@ -40,27 +40,45 @@ export default function AdminGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  async function fetchItems() {
+  async function fetchItems(): Promise<GalleryItem[]> {
+    const response = await fetch("/api/gallery", {
+      method: "GET",
+      cache: "no-store",
+    });
+    const data = await response.json();
+
+    console.log("Gallery API response:", data);
+
+    return data?.success && Array.isArray(data?.data?.gallery)
+      ? data.data.gallery
+      : [];
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchItems()
+      .then((galleryItems) => {
+        if (isMounted) setItems(galleryItems);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch gallery:", error);
+        if (isMounted) setItems([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function refreshItems() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/gallery", {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      const data = await response.json();
-
-      console.log("Gallery API response:", data);
-
-      if (
-        data?.success &&
-        Array.isArray(data?.data?.gallery)
-      ) {
-        setItems(data.data.gallery);
-      } else {
-        setItems([]);
-      }
+      setItems(await fetchItems());
     } catch (error) {
       console.error("Failed to fetch gallery:", error);
       setItems([]);
@@ -68,10 +86,6 @@ export default function AdminGalleryPage() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    fetchItems();
-  }, []);
 
   async function handleSave(values: GalleryFormValues) {
     try {
@@ -115,7 +129,7 @@ export default function AdminGalleryPage() {
 
       setEditingId(null);
 
-      await fetchItems();
+      await refreshItems();
     } catch (error) {
       console.error("Save gallery error:", error);
       alert("Something went wrong while saving the gallery image.");
@@ -147,7 +161,7 @@ export default function AdminGalleryPage() {
         setEditingId(null);
       }
 
-      await fetchItems();
+      await refreshItems();
     } catch (error) {
       console.error("Delete gallery error:", error);
       alert("Something went wrong while deleting the image.");
@@ -189,7 +203,7 @@ export default function AdminGalleryPage() {
         return;
       }
 
-      await fetchItems();
+      await refreshItems();
     } catch (error) {
       console.error("Toggle gallery status error:", error);
       alert("Something went wrong while changing the status.");

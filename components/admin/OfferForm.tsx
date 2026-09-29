@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type OfferFormValues = {
   title: string;
@@ -47,31 +47,6 @@ export default function OfferForm({
   });
 
   const [loading, setLoading] = useState(false);
-
-  /*
-   * IMPORTANT:
-   * When Edit button is clicked, initialValues changes.
-   * This updates the form with the selected offer.
-   */
-  useEffect(() => {
-    setValues({
-      title: initialValues?.title ?? "",
-      description: initialValues?.description ?? "",
-      discount: initialValues?.discount ?? "",
-      image: initialValues?.image ?? "",
-      startDate: initialValues?.startDate ?? "",
-      endDate: initialValues?.endDate ?? "",
-      isActive: initialValues?.isActive ?? true,
-    });
-  }, [
-    initialValues?.title,
-    initialValues?.description,
-    initialValues?.discount,
-    initialValues?.image,
-    initialValues?.startDate,
-    initialValues?.endDate,
-    initialValues?.isActive,
-  ]);
 
   function updateField<K extends keyof OfferFormValues>(
     field: K,
