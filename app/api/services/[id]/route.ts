@@ -3,24 +3,52 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Service from "@/models/Service";
-
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    await connectDB();
-    const service = await Service.findById(id).lean();
 
-    if (!service) {
-      return NextResponse.json({ success: false, message: "Service not found." }, { status: 404 });
+    await connectDB();
+
+    const serviceDoc = await Service.findById(id);
+
+    if (!serviceDoc) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Service not found.",
+        },
+        {
+          status: 404,
+        }
+      );
     }
 
-    return NextResponse.json({ success: true, data: { service: { ...service, _id: String(service._id) } } });
+    const service = serviceDoc.toObject();
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        service: {
+          ...service,
+          _id: String(service._id),
+        },
+      },
+    });
   } catch (error) {
     console.error("Get service by id error:", error);
-    return NextResponse.json({ success: false, message: "Unable to load service." }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Unable to load service.",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
 

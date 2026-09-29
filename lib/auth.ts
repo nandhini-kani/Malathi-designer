@@ -43,8 +43,18 @@ export async function requireAdmin() {
 
   await connectDB();
 
-  const user = await User.findById(userId).select("-password").lean();
-  return user ? { ...user, _id: String(user._id) } : null;
+  const userDoc = await User.findById(userId).select("-password");
+
+  if (!userDoc) {
+    return null;
+  }
+
+  const user = userDoc.toObject();
+
+  return {
+    ...user,
+    _id: String(user._id),
+  };
 }
 
 export const ADMIN_CREDENTIALS = {

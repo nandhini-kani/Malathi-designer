@@ -25,9 +25,9 @@ export async function GET(
 
     await connectDB();
 
-    const item = await Gallery.findById(id).lean();
+    const itemDoc = await Gallery.findById(id);
 
-    if (!item) {
+    if (!itemDoc) {
       return NextResponse.json(
         {
           success: false,
@@ -38,6 +38,8 @@ export async function GET(
         }
       );
     }
+
+    const item = itemDoc.toObject();
 
     return NextResponse.json({
       success: true,
@@ -57,8 +59,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        message:
-          "Unable to load gallery item.",
+        message: "Unable to load gallery item.",
       },
       {
         status: 500,
@@ -66,7 +67,6 @@ export async function GET(
     );
   }
 }
-
 /* =========================================================
    UPDATE GALLERY ITEM
    ========================================================= */
