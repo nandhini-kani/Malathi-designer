@@ -1,7 +1,6 @@
-
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import cloudinary, { cloudinaryFolder } from "@/lib/cloudinary";
+import cloudinary from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
 
@@ -14,19 +13,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "Unauthorized."
+          message: "Unauthorized.",
         },
         { status: 401 }
       );
     }
 
-    if (
-      !process.env.CLOUDINARY_CLOUD_NAME ||
-      !process.env.CLOUDINARY_API_KEY ||
-      !process.env.CLOUDINARY_API_SECRET
-    ) {
+    // Check Cloudinary configuration
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      console.error("Cloudinary configuration is missing.");
+
       return NextResponse.json(
-        { success: false, message: "Cloudinary configuration is missing." },
+        {
+          success: false,
+          message: "Cloudinary configuration is missing.",
+        },
         { status: 500 }
       );
     }
@@ -39,18 +44,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "No image file selected."
+          message: "No image file selected.",
         },
         { status: 400 }
       );
     }
 
-    // Check file type
+    // Check image type
     if (!file.type.startsWith("image/")) {
       return NextResponse.json(
         {
           success: false,
-          message: "Only image files are allowed."
+          message: "Only image files are allowed.",
         },
         { status: 400 }
       );
@@ -61,13 +66,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          message: "Image must be smaller than 5MB."
+          message: "Image must be smaller than 5MB.",
         },
         { status: 400 }
       );
     }
 
-    // Convert file to Buffer
+    // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
@@ -78,8 +83,8 @@ export async function POST(request: Request) {
     }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: `${cloudinaryFolder}/services`,
-          resource_type: "image"
+          folder: "malathi-designer/services",
+          resource_type: "image",
         },
         (error, result) => {
           if (error) {
@@ -94,7 +99,7 @@ export async function POST(request: Request) {
 
           resolve({
             secure_url: result.secure_url,
-            public_id: result.public_id
+            public_id: result.public_id,
           });
         }
       );
@@ -108,17 +113,21 @@ export async function POST(request: Request) {
       success: true,
       data: {
         url: result.secure_url,
-        publicId: result.public_id
+        publicId: result.public_id,
       },
-      message: "Image uploaded successfully."
+      message: "Image uploaded successfully.",
     });
   } catch (error) {
     console.error("UPLOAD API ERROR:", error);
 
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown upload error";
+
     return NextResponse.json(
       {
         success: false,
-        message: "Unable to upload image."
+        message: "Unable to upload image.",
+        error: errorMessage,
       },
       { status: 500 }
     );
