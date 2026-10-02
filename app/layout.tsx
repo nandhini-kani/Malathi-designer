@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import VisitorTracker from "@/components/VisitorTracker";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -37,6 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <VisitorTracker />
       <body>{children}</body>
     </html>
   );

@@ -1,7 +1,10 @@
+
+
 import Hero from "@/components/Hero";
 import TrustSection from "@/components/TrustSection";
 import About from "@/components/About";
 import Services from "@/components/Services";
+import Gallery from "@/components/Gallery";
 import HowItWorks from "@/components/HowItWorks";
 
 export default function Home() {
@@ -13,11 +16,12 @@ export default function Home() {
 
       <About />
 
-      <Services
-        preview
-      />
+      <Services preview />
+
+      <Gallery />
 
       <HowItWorks />
     </>
   );
 }
+

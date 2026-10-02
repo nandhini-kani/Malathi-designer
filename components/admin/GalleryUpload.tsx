@@ -124,52 +124,65 @@ export default function GalleryUpload({
     }
   }
 
-  async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
+
+async function handleSubmit(
+  event: React.FormEvent<HTMLFormElement>
+) {
+  event.preventDefault();
+
+  setFormError("");
+  setImageError("");
+
+  if (!title.trim()) {
+    setFormError("Please enter a gallery title.");
+    return;
+  }
+
+  if (!imageUrl.trim()) {
+    setImageError(
+      "Please upload a gallery image first."
+    );
+    return;
+  }
+
+  setSaving(true);
+
+  try {
+    await onSubmit({
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      imageUrl,
+      publicId,
+      isActive,
+    });
+
+    // RESET FORM AFTER SUCCESSFUL SAVE
+    setTitle("");
+    setDescription("");
+    setCategory("Other");
+    setImageUrl("");
+    setPublicId("");
+    setIsActive(true);
 
     setFormError("");
     setImageError("");
 
-    if (!title.trim()) {
-      setFormError("Please enter a gallery title.");
-      return;
-    }
+  } catch (error) {
+    console.error(
+      "Save gallery error:",
+      error
+    );
 
-    if (!imageUrl.trim()) {
-      setImageError(
-        "Please upload a gallery image first."
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await onSubmit({
-        title: title.trim(),
-        description: description.trim(),
-        category,
-        imageUrl,
-        publicId,
-        isActive,
-      });
-    } catch (error) {
-      console.error(
-        "Save gallery error:",
-        error
-      );
-
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Unable to save gallery image."
-      );
-    } finally {
-      setSaving(false);
-    }
+    setFormError(
+      error instanceof Error
+        ? error.message
+        : "Unable to save gallery image."
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   function removeImage() {
     setImageUrl("");
@@ -211,7 +224,7 @@ export default function GalleryUpload({
           />
         </div>
 
-        {/* <div>
+        <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
             Category
           </label>
@@ -233,7 +246,7 @@ export default function GalleryUpload({
               </option>
             ))}
           </select>
-        </div> */}
+        </div>
       </div>
 
       {/* DESCRIPTION */}

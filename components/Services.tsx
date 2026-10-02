@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Sparkles } from "lucide-react";
 
 import SectionHeading from "@/components/SectionHeading";
 import EmptyState from "@/components/EmptyState";
@@ -77,84 +78,84 @@ export default function Services({
         />
 
         {loading ? (
-          <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+          <div className="mt-10 rounded-3xl border border-violet-100 bg-violet-50/50 p-10 text-center text-violet-700">
             Loading services...
           </div>
         ) : shown.length > 0 ? (
-          <div className="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 
             {shown.map((service) => (
-              <div
+              <article
                 key={service._id}
-                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
 
-                {/* IMAGE */}
-                <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-violet-100 via-purple-50 to-rose-50">
+                {/* FULL IMAGE AREA */}
+                <div className="relative h-[390px] w-full overflow-hidden bg-violet-50">
 
+                  {/* Image */}
                   {service.image ? (
                     <Image
                       src={service.image}
                       alt={service.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <div className="text-center">
-                        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-                          <span className="text-3xl">🧵</span>
+                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-md">
+                          <span className="text-4xl">🧵</span>
                         </div>
 
-                        <p className="text-sm font-medium text-violet-700">
+                        <p className="mt-4 text-sm font-semibold text-violet-700">
                           Malathi Designer
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* IMAGE OVERLAY */}
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
-
-                  {/* SERVICE LABEL */}
-                  <div className="absolute left-4 top-4">
-                    <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm backdrop-blur">
+                  {/* Category badge */}
+                  <div className="absolute left-5 top-5 z-20">
+                    <div className="flex items-center gap-1.5 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-bold text-violet-800 shadow-md backdrop-blur-md">
+                      <Sparkles size={13} />
                       Tailoring Service
-                    </span>
+                    </div>
                   </div>
 
                 </div>
 
                 {/* CONTENT */}
-                <div className="p-6">
+                <div className="px-4 py-3">
 
-                  <h3 className="text-xl font-bold text-violet-950">
+                  <h3 className="text-lg font-bold tracking-tight text-violet-950">
                     {service.title}
                   </h3>
 
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
+                  <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-slate-600">
                     {service.description}
                   </p>
 
-                  {/* BOTTOM */}
-                  <div className="mt-6 flex items-center justify-between gap-4 border-t border-slate-100 pt-5">
+                  <div className="my-2.5 h-px bg-slate-100" />
+
+                  <div className="flex items-center justify-between gap-3">
 
                     <div>
                       {service.price !== undefined &&
                       service.price !== null &&
                       String(service.price).trim() !== "" ? (
                         <>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-[11px] font-medium text-slate-500">
                             Starting from
                           </p>
 
-                          <p className="mt-1 text-lg font-bold text-violet-900">
-                            ₹ {String(service.price)}
+                          <p className="mt-0.5 text-base font-bold text-violet-900">
+                            ₹{String(service.price)}
                           </p>
                         </>
                       ) : (
-                        <p className="text-sm font-medium text-slate-500">
+                        <p className="text-xs font-medium text-slate-500">
                           Price on enquiry
                         </p>
                       )}
@@ -164,22 +165,25 @@ export default function Services({
                       href="https://wa.me/918248744594"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-800"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-violet-700 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-violet-800"
                     >
-                      <MessageCircle size={16} />
+                      <MessageCircle size={14} />
                       Enquire
                     </a>
 
                   </div>
 
                 </div>
-              </div>
+
+              </article>
             ))}
 
           </div>
         ) : (
           <div className="mt-10">
-            <EmptyState message="Services will appear here after they are added from the admin panel." />
+            <EmptyState
+              message="Services will appear here after they are added from the admin panel."
+            />
           </div>
         )}
 
@@ -187,3 +191,4 @@ export default function Services({
     </section>
   );
 }
+
